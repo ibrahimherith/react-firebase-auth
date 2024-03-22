@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 //Firebase authentication & functions
 import { auth, googleProvider } from "../config/firebase";
@@ -14,7 +15,8 @@ import { FcGoogle } from "react-icons/fc";
 import { Link } from "react-router-dom";
 
 const Signup = () => {
-  //functions to grab data entered by users
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,10 +28,26 @@ const Signup = () => {
     if (email && password && confirmPassword) {
       if (password === confirmPassword) {
         try {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } catch (err) {
-          console.error(err);
+          await createUserWithEmailAndPassword(auth, email, password).then(
+            (userCredintial) => {
+              //signed in
+              const user = userCredintial.user;
+              console.log(user);
+              navigate("/");
+            }
+          );
+        } catch (error) {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode, errorMessage);
         }
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      } else {
+        console.log("Password does not match!");
+        setPassword("");
+        setConfirmPassword("");
       }
     }
   };
@@ -37,9 +55,16 @@ const Signup = () => {
   //creating account with google function
   const createAccountWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      console.error(err);
+      await signInWithPopup(auth, googleProvider).then((userCredintial) => {
+        //signed in
+        const user = userCredintial.user;
+        console.log(user);
+        navigate("/");
+      });
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
     }
   };
 
@@ -105,7 +130,7 @@ const Signup = () => {
         </form>
 
         <button onClick={createAccountWithGoogle} className="button-google">
-          <FcGoogle size={20} /> Continue with Google
+          <FcGoogle size={20} /> Create account with Google
         </button>
         <p>
           Already have an account?{" "}

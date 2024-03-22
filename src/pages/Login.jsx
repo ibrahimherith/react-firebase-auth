@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 //Firebase authentication / functions
 import { auth, googleProvider } from "../config/firebase";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 //page animation
 import "animate.css";
@@ -14,6 +14,8 @@ import { FaLock } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -23,9 +25,18 @@ const Login = () => {
 
     if (email && password) {
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        console.log("This error");
+        await signInWithEmailAndPassword(auth, email, password).then(
+          (userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            navigate("/home");
+            console.log(user);
+          }
+        );
+      } catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
       }
       setEmail("");
       setPassword("");
@@ -37,7 +48,12 @@ const Login = () => {
   //function to handle sign in with google
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider).then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        navigate("/home");
+        console.log(user);
+      });
     } catch (err) {
       console.error(err);
     }
