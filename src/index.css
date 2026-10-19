@@ -75,7 +75,7 @@ section {
   padding: 0 2rem;
   width: 100%;
   display: flex;
-  align-items: start;
+  align-items: flex-start;
 }
 
 @media (min-width: 640px) {
